@@ -66,49 +66,32 @@ def pizzas():
 
 @app.route('/restaurant_pizzas',methods=['GET','POST'])
 def restaurant_pizzas():
-
-    price = request.form.get('price')
-    pizza_id = request.form.get('pizza_id')
-    restaurant_id =request.form.get('restaurant_id')
-    pizza = Pizza.query.filter(id ==Pizza.id).first()
-    restaurant = Restaurant.query.filter(id ==Restaurant.id).first()
-    # if not(price and pizza_id and restaurant_id):
-    #     msg = {"errors": ["validation errors"]}
-    #     return jsonify(msg), 400
-
-    try:
-        pizza_id = int(pizza_id)
-        restaurant_id = int(restaurant_id)
-    except ValueError:
-        msg = {"errors": ["Invalid pizza_id or restaurant_id format"]}
-        return jsonify(msg), 400
-    # if not ( pizza and restaurant):
-    #     msg = {"errors": ["Pizza or Restaurant not found"]}
-    #     return jsonify(msg), 404    
-
-    new_res_piz = RestaurantPizza(
+        try: 
+            if request.method == 'POST': 
+                data =request.get_json()
+                price = data.get('price')
+                pizza_id = data.get('pizza_id')
+                restaurant_id =data.get('restaurant_id')
+        # pizza = Pizza.query.get(pizza_id)
+        # restaurant = Restaurant.query.get(restaurant_id)
+    
+            new_res_piz = RestaurantPizza(
                         price = price,
                         pizza_id = pizza_id,
                         restaurant_id = restaurant_id,
-    )
-    db.session.add(new_res_piz)
-    db.session.commit()
-    if new_res_piz :
-        res_piz_dict = {
-                        'pizza': pizza.to_dict(),
-                        'pizza_id': new_res_piz.id,
-                        'price': new_res_piz.price,
-                        'restaurant': restaurant.to_dict(),
-                        'restaurant_id': new_res_piz.restaurant_id
-        }
+            )
+            db.session.add(new_res_piz)
+            db.session.commit()
+        
+            res_piz_dict = new_res_piz.to_dict()
+            
 
-        response = make_response(jsonify(res_piz_dict),201)
-        return response
-    else: 
-        msg = {"errors": ["validation errors"]}
-        msg_dict = msg.to_dict()
-        response(jsonify(msg_dict),400)
-        return response 
+            response = make_response(jsonify(res_piz_dict),201)
+            return response
+        except: 
+            msg = {"errors": ["validation errors"]}
+            
+            return (msg,400)
     
 
 # @app.route('/restaurant_pizzas', methods=['POST'])
